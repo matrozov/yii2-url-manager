@@ -19,11 +19,6 @@ class HostUrlRule extends CompositeUrlRule
     /**
      * @var string
      */
-    public $scheme;
-
-    /**
-     * @var string
-     */
     public $host;
 
     /**
@@ -45,19 +40,9 @@ class HostUrlRule extends CompositeUrlRule
      */
     public function init()
     {
-        if (empty($this->scheme)) {
-            if (Yii::$app->request instanceof \yii\web\Request) {
-                $scheme = Yii::$app->request->isSecureConnection ? 'https' : 'http';
-            }
-            else {
-                throw new InvalidConfigException('`scheme` property must be set.');
-            }
-        }
-
         if (empty($this->host)) {
             throw new InvalidConfigException('`host` property must be set.');
         }
-
         parent::init();
     }
 
@@ -117,10 +102,11 @@ class HostUrlRule extends CompositeUrlRule
         foreach ($this->rules as $rule) {
             /* @var $rule \yii\web\UrlRule */
             if (($url = $rule->createUrl($manager, $route, $params)) !== false) {
+                $hostInfo = Yii::$app->request->isSecureConnection ? 'https' : 'http';
                 if (substr($url, 0, 1) !== '/') {
                     $url = '/'.$url;
                 }
-                return $this->scheme.'://'.$this->host.$url;
+                return $hostInfo.'://'.$this->host.$url;
             }
         }
         return false;
